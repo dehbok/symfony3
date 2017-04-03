@@ -72,5 +72,5 @@ fos_user:
     firewall_name: main
     user_class: AppBundle\Entity\User
     from_email:
-        address: "noreplay@test_symfony.om"
+        address: "noreplay@test_symfony.com"
         sender_name: "Admin"
