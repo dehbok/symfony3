@@ -1,7 +1,16 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Denys
- * Date: 04.04.2017
- * Time: 22:30
- */
+
+namespace NotificationBundle\Controller;
+
+use FOS\UserBundle\Controller\ProfileController as FOSUser;
+use FOS\UserBundle\FOSUserEvents;
+
+class ProfileController extends FOSUser
+{
+    public function showAction()
+    {
+        $response = parent::showAction();
+//$this->renderView();
+        return $response;
+    }
+}
