@@ -4,3 +4,7 @@ app:
 
 fos_user:
     resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+
+hide_notification:
+    path:     /hide_notifications
+    defaults: { _controller: 'AppBundle\Controller\DefaultController::hideNotification' }

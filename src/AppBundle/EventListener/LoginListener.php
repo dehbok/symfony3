@@ -1,6 +1,7 @@
 <?php
-namespace NotificationBundle\EventListener;
+namespace AppBundle\EventListener;
 
+use AppBundle\Entity\Notification;
 use FOS\UserBundle\FOSUserEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\SecurityEvents;
@@ -11,17 +12,20 @@ use Symfony\Component\Security\Http\SecurityEvents;
 class LoginListener implements EventSubscriberInterface
 {
 
-    private $container;
+    private $user;
 
     private $template;
 
     private $mailer;
 
-    public function __construct($container, $template, $mailer)
+    private $doctrine;
+
+    public function __construct($container, $template, $mailer, $doctrine)
     {
-        $this->container = $container;
+        $this->user = $container->getToken()->getUser();
         $this->template = $template;
         $this->mailer = $mailer;
+        $this->doctrine = $doctrine;
     }
 
 
@@ -38,9 +42,26 @@ class LoginListener implements EventSubscriberInterface
 
     public function onLogin($event)
     {
-        $user = $this->container->getToken()->getUser();
-        $email = $user->getEmail();
-        $name = $user->getUsername();
+        $this->sendEmail();
+        $this->createNotification();
+    }
+
+    private function createNotification()
+    {
+        $newNotification = new Notification();
+        $newNotification->setUser($this->user);
+        $newNotification->setCreatedDate(new \DateTime("now"));
+        $newNotification->setIsDisplayed(false);
+
+        $manager = $this->doctrine->getManager();
+        $manager->persist($newNotification);
+        $manager->flush();
+    }
+
+    private function sendEmail()
+    {
+        $email = $this->user->getEmail();
+        $name = $this->user->getUsername();
 
         $message = \Swift_Message::newInstance()
             ->setSubject('Login notification')
@@ -48,7 +69,7 @@ class LoginListener implements EventSubscriberInterface
             ->setTo($email)
             ->setBody(
                 $this->template->render(
-                    // app/Resources/views/Emails/login.html.twig
+                // app/Resources/views/Emails/login.html.twig
                     'Emails/login.html.twig',
                     array('name' => $name)
                 ),
